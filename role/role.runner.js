@@ -1,19 +1,21 @@
+var sharedFunctions = require('role.sharedFunctions');
+
 var roleRunner = {
     run: function(creep){
-        var spawn = Game.spawns["Spawn1"];
-        
         if (creep.carry.energy == 0){
-            if (spawn.energy >= 225){
-                if(creep.withdraw(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(spawn, {visualizePathStyle: {stroke: '#ffaa00'}});
+            var targets = sharedFunctions.getEnergyFromContainers(creep);
+            var target = creep.pos.findClosestByPath(targets);
+            if (target){
+                if(creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                 creep.moveTo(target, {visualizePathStyle: {stroke: '#ffaa00'}});
                 }
             }
         } 
         else {
             var targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_EXTENSION) &&
-                            structure.energy < 50;
+                        return (structure.structureType == STRUCTURE_TOWER &&
+                            structure.energy < structure.energyCapacity);
                     }
             });
             var filteredTarget = creep.pos.findClosestByRange(targets);

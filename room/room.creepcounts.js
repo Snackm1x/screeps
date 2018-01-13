@@ -1,4 +1,9 @@
 var CreepCounts = {
+    CreepCounts: function(harvestersMax, upgradersMax, buildersMax){
+        this.harvestersMax = harvestersMax,
+        this.upgradersMax = upgradersMax;
+        this.buildersMax = buildersMax;
+    },
     harvesters: 0,
     harvestersMax: 8,
     upgraders: 0,

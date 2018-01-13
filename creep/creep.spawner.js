@@ -1,6 +1,7 @@
 var CreepCounts = require('room.creepcounts');
 var roomManager = require('room.manager');
-var roles = require('role.enums');
+var roles = require('creep.roles');
+var classTypes = require('class.types');
 
 var creepSpawner = {
     
@@ -17,31 +18,26 @@ var creepSpawner = {
     },
     
     getPriority: function(spawn) {
-        console.log(roles.HARVESTER);
         if(this.getHarvesterPriority(spawn, roles.HARVESTER)){
-            console.log('asdfasdfas');
-            var harvester = this.spawnHarvester(spawn, roles.HARVESTER);
-            var counter = spawn.room.memory.creepCounts;
-            counter.harvestersMax++;
-            spawn.room.memory.creepCounts.harvesters = counter;
+            var harvester = this.spawnHarvester(spawn, roles.HARVESTER, classTypes.WORKER);
         }else{
+            if (this.getRepairerPriority(spawn, roles.REPAIRER)){
+                var repairer = this.spawnHarvester(spawn, roles.REPAIRER, classTypes.WORKER);
+            }
+            if (this.getRunnerPriority(spawn, roles.RUNNER)){
+                var repairer = this.spawnHarvester(spawn, roles.RUNNER, classTypes.WORKER);
+            }
             if (this.getUpgraderPriority(spawn, roles.UPGRADER)){
-                var upgrader = this.spawnSmallWorker(roles.UPGRADER);
-                var counter = spawn.room.memory.creepCounts;
-                counter.upgradersMax++;
-                spawn.room.memory.creepCounts.upgraders = counter;
+                var upgrader = this.spawnHarvester(spawn, roles.UPGRADER, classTypes.WORKER);
             }
             if (this.getBuilderPriority(spawn, roles.BUILDER)){
-                var builder = this.spawnSmallWorker(roles.BUILDER);
-                var counter = spawn.room.memory.creepCounts;
-                counter.buildersMax++;
-                spawn.room.memory.creepCounts.builders = counter;
+                var builder = this.spawnHarvester(spawn, roles.BUILDER, classTypes.WORKER);
             }
         }
     },
     
     getHarvesterPriority: function(spawn){
-        var harvesters = this.filterCreepsForRole(spawn, 'harvester');
+        var harvesters = this.filterCreepsForRole(spawn, roles.HARVESTER);
         //return harvesters.length < spawn.room.memory.creepCounts.harvestersMax;
         return harvesters.length < 5;
     },
@@ -54,19 +50,30 @@ var creepSpawner = {
                                     return (source.memory.workers < source.memory.maxWorkers)
                                 }
                              });
-            console.log(sources);
         }
         
     },
     
     getUpgraderPriority: function(spawn){
-        var upgraders = this.filterCreepsForRole(spawn, 'upgrader');
+        var upgraders = this.filterCreepsForRole(spawn, roles.UPGRADER);
         //return upgraders.length < spawn.room.memory.creepCounts.upgradersMax;
         return upgraders.length < 2;
     },
     
+    getRunnerPriority: function(spawn){
+        var runners = this.filterCreepsForRole(spawn, roles.RUNNER);
+        //return upgraders.length < spawn.room.memory.creepCounts.upgradersMax;
+        return runners.length < 1;
+    },
+    
+    getRepairerPriority: function(spawn){
+        var repairers = this.filterCreepsForRole(spawn, roles.REPAIRER);
+        //return upgraders.length < spawn.room.memory.creepCounts.upgradersMax;
+        return repairers.length < 1;
+    },
+    
     getBuilderPriority: function(spawn){
-        var builders = this.filterCreepsForRole(spawn, 'builder');
+        var builders = this.filterCreepsForRole(spawn, roles.BUILDER);
         //return builders.length < spawn.room.memory.creepCounts.buildersMax;
         return builders.length < 2;
     },
@@ -80,23 +87,31 @@ var creepSpawner = {
           });
     },
     
-    spawnSmallWorker: function(role) {
+    spawnHarvester: function(spawn, role, classType){
         var newName = role + Game.time;
-        var unit = Game.spawns['Spawn1'].spawnCreep([WORK,CARRY,MOVE], newName, 
-            {memory: {role: role, class: 'worker'}});
-        return unit;
+        var largeCost = BODYPART_COST.work * 2 + BODYPART_COST.carry * 2 + BODYPART_COST.move;
+        if (spawn.room.energyAvailable > largeCost){
+            this.spawnLarger(spawn, role, classType);
+        }
+        // console.log(spawn.room.energyAvailable);
+        // if (spawn.room.energyAvailable > largeCost){
+        //     var unit = spawn.spawnCreep([WORK,WORK,CARRY,CARRY,MOVE], newName,
+        //         {memory: {role: role, class: classType}});
+        //         return unit
+        // } else {
+        //     var unit = spawn.spawnCreep([WORK,CARRY,MOVE], newName,
+        //         {memory: {role: role, class: classType}});
+        //     return unit;
+        // }
     },
     
-    spawnHarvester: function(spawn, role){
+    spawnLarger: function(spawn, role, classType){
         var newName = role + Game.time;
-        var unit = spawn.spawnCreep([WORK,CARRY,MOVE], newName,
-            {memory: {role: role, class: 'worker'}});
-        return unit;
-    },
-    
-    debug: function(word, obj){
-        console.log(word + ": " + obj);
+        var unit = spawn.spawnCreep([WORK,WORK,CARRY,CARRY,MOVE], newName,
+                {memory: {role: role, class: classType}});
+                return unit
     }
+    
 };
 
 module.exports = creepSpawner;

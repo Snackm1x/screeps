@@ -18,7 +18,14 @@ var Worker = {
                 roleUpgrader.run(creep);
                 break;
             case "builder":
-                roleBuilder.run(creep);
+                //roleBuilder.run(creep);
+                roleUpgrader.run(creep);
+                break;
+            case "repairer":
+                roleRepairer.run(creep);
+                break;
+            case "runner":
+                roleRunner.run(creep);
                 break;
         }
     },

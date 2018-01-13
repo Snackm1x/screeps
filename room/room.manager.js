@@ -1,3 +1,4 @@
+var tFighter = require('tower.fighter');
 var creepCounts = require('room.creepcounts');
 
 var roomManager = {
@@ -11,6 +12,7 @@ var roomManager = {
             if (!room.memory.creeps){
                 room.memory.creeps = room.find(FIND_MY_CREEPS);
             }
+            tFighter.run(room);
             this.initRoom(room);
         }
     },
@@ -25,10 +27,14 @@ var roomManager = {
                     var source = sources[i];
                     total += source.memory.maxWorkers;
                 }
-                room.memory.creepCounts = creepCounts;
+                room.memory.creepCounts = this.initRoomCreeps();
             }
             this.updateSources(room);
         }
+    },
+    
+    initRoomCreeps: function(){
+        return new creepCounts.CreepCounts(8, 2, 2);
     },
     
     updateSources: function(room){

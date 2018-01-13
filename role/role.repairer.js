@@ -13,10 +13,11 @@ var roleRepairer = {
         }
         
         if(creep.memory.repairing) {
-            var targets = creep.room.find(FIND_MY_STRUCTURES, {
-            filter: object => object.hits < object.hitsMax
-            });
-            
+            var targets = creep.room.find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return structure.structureType != STRUCTURE_WALL && structure.hits < structure.hitsMax;
+                }
+            })
             targets.sort((a,b) => a.hits - b.hits);
             if(targets.length > 0) {
                 if (creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
@@ -27,7 +28,7 @@ var roleRepairer = {
         else {
             var targets = sharedFunctions.findEnergyFromAnywhere(creep);
             var target = creep.pos.findClosestByPath(targets);
-            roleSharedFunctions.withdrawEnergyFromTarget(creep, target);
+            sharedFunctions.withdrawEnergyFromTarget(creep, target);
         }
     }
 };

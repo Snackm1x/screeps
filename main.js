@@ -12,7 +12,7 @@ module.exports.loop = function () {
             console.log('Clearing non-existing creep memory:', name);
         }
     }
-      
+    
     creepSpawner.run(Game.spawns);
     
     classManager.run(Game.creeps);

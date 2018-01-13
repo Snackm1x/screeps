@@ -15,7 +15,7 @@ var roleBuilder = {
         }
 
         if(creep.memory.building) {
-            var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+            var targets = this.findConstructionSites(creep.room);
             if(targets.length) {
                 if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
@@ -29,7 +29,12 @@ var roleBuilder = {
                 creep.moveTo(target, {visualizePathStyle: {stroke: '#ffaa00'}});
             }
         }
-    }
+    },
+    
+    findConstructionSites: function(room){
+        //Add priority building into this (things before roads etc)
+        return room.find(FIND_CONSTRUCTION_SITES);
+    },
 };
 
 module.exports = roleBuilder;
