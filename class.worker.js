@@ -1,8 +1,6 @@
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
-var roleRunner = require('role.runner');
-var roleRepairer = require('role.repairer');
 
 var Worker = {
     run: function(creep){
@@ -18,14 +16,7 @@ var Worker = {
                 roleUpgrader.run(creep);
                 break;
             case "builder":
-                //roleBuilder.run(creep);
-                roleUpgrader.run(creep);
-                break;
-            case "repairer":
-                roleRepairer.run(creep);
-                break;
-            case "runner":
-                roleRunner.run(creep);
+                roleBuilder.run(creep);
                 break;
         }
     },
