@@ -1,7 +1,6 @@
 var roomFunctions = require('room.sharedFunctions');
 
 var roomBuilding = {
-    
     level2Building: function(room){
         var mySpawns = roomFunctions.getRoomSpawns(room);
         var startSpawn = mySpawns[0];
@@ -26,12 +25,18 @@ var roomBuilding = {
     },
     
     placeMiningContainers: function(room){
-        var containers = room.memory.miningContainers;
-        room.memory.miningContainers = {};
+        let containers = room.memory.miningContainers;
         for (var i = 0; i < containers.length; i++){
             var miningContainer = containers[i];
-            room.createConstructionSite(miningContainer.x, miningContainer.y, STRUCTURE_CONTAINER);
-            miningContainer.memory = room.memory.miningContainers[miningContainer.id] = {};
+            if(!miningContainer.IsBuilding){
+                miningContainer.IsBuilding = true;
+            }
+            room.createConstructionSite(miningContainer.position.x, miningContainer.position.y, STRUCTURE_CONTAINER);
+            
+            //this places roads break this out?
+            let mySpawns = roomFunctions.getRoomSpawns(room);
+            let startSpawn = mySpawns[0];
+            this.placeRoadsTo(room, startSpawn.pos, miningContainer.position);
         }
     },
     
@@ -40,10 +45,13 @@ var roomBuilding = {
     },
     
     placeRoadsTo: function(room, startPosition, endPosition){
-        var myPath = room.findPath(startPosition, endPosition);
-        for (var i = 1; i < myPath.length - 1; i++){
+        const end = new RoomPosition(endPosition.x, endPosition.y, room.name);
+        let myPath = room.findPath(startPosition, end);
+        for (var i = 0; i < myPath.length - 1; i++){
             var posObj = myPath[i];
-            room.createConstructionSite(posObj.x, posObj.y, STRUCTURE_ROAD);
+            if (room.createConstructionSite(posObj.x, posObj.y, STRUCTURE_ROAD) == OK){
+                room.createConstructionSite(posObj.x, posObj.y, STRUCTURE_ROAD)
+            }
         }
     },
     
@@ -62,50 +70,6 @@ var roomBuilding = {
         }
         return true;
     },
-    
-    checkWest: function(startPosition, room){
-        var x = startPosition.x - i;
-        var y = startPosition.y;
-        var terrain = Game.map.getTerrainAt(x,y, room);
-        if (terrain != "wall"){
-            return true;
-        } else {
-            return false;
-        }
-    },
-    
-    checkNorth: function(startPosition, room){
-        var x = startPosition.x;
-        var y = startPosition.y + 1;
-        var terrain = Game.map.getTerrainAt(x,y, room);
-        if (terrain != "wall"){
-            return true;
-        } else {
-            return false;
-        }
-    },
-    
-    checkEast: function(startPosition, room){
-        var x = startPosition.x + 1;
-        var y = startPosition.y;
-        var terrain = Game.map.getTerrainAt(x,y, room);
-        if (terrain != "wall"){
-            return true;
-        } else {
-            return false;
-        }
-    },
-    
-    checkSouth: function(startPosition, room){
-        var x = startPosition.x;
-        var y = startPosition.y - 1;
-        var terrain = Game.map.getTerrainAt(x,y, room);
-        if (terrain != "wall"){
-            return true;
-        } else {
-            return false;
-        }
-    }
 };
 
 module.exports = roomBuilding;

@@ -17,11 +17,16 @@ var roomManager = {
     },
     
     manageRoom: function(room){
-        this.getCreepCount(room);
+        this.updateRoomMemory(room);
         creepSpawner.determineSpawn(room);
         let myCreeps = room.find(FIND_MY_CREEPS);
         classManager.run(myCreeps);
         this.checkRoomLevel(room);
+    },
+    
+    updateRoomMemory: function(room){
+        this.getCreepCount(room);
+        this.getConstructionSites(room);
     },
     
     checkRoomLevel: function(room){
@@ -46,20 +51,48 @@ var roomManager = {
     },
     
     getCreepCount: function(room){
+        let screeps = room.memory.screeps;
         let workers = _.filter(room.find(FIND_MY_CREEPS), (creep) => creep.memory.class == "worker");
         let harvesters = _.filter(workers, (creep) => creep.memory.role == "harvester");
         let upgraders = _.filter(workers, (creep) => creep.memory.role == "upgrader");
         let builders = _.filter(workers, (creep) => creep.memory.role == "builder");
         
-        room.memory.workers = workers.length - this.getCloseToDeath(workers) || 0;
-        room.memory.harvesters = harvesters.length - this.getCloseToDeath(harvesters) || 0;
-        room.memory.upgraders = upgraders.length - this.getCloseToDeath(upgraders) || 0;
-        room.memory.builders = builders.length - this.getCloseToDeath(builders) || 0;
+        screeps.workers = workers.length;
+        screeps.harvesters = harvesters.length - this.getCloseToDeath(harvesters) || 0;
+        screeps.upgraders = upgraders.length - this.getCloseToDeath(upgraders) || 0;
+        screeps.builders = builders.length - this.getCloseToDeath(builders) || 0;
+        screeps.shouldSpawn = this.setShouldSpawn(room);
+    },
+    
+    setShouldSpawn: function(room){
+        let screeps = room.memory.screeps;
+        if (screeps.harvesters < screeps.harvestersMax){
+            return true;
+        }
+        if (screeps.upgraders < screeps.upgradersMax){
+            return true;
+        }
+        if (screeps.builders < screeps.buildersMax){
+            return true;
+        }
+        return false;
+    },
+    
+    getStructures: function(room){
+        
+    },
+    
+    getConstructionSites: function(room){
+        if (!room.memory.buildingSites){
+            room.memory.buildingSites = {};
+            let mySites = room.find(FIND_CONSTRUCTION_SITES);
+            room.memory.buildingSites = mySites.length;
+        }
     },
     
     getCloseToDeath: function(screeps){
-        return _.filter(screeps, (creep) => creep.ticksToLive <= 400);
+        return _.filter(screeps, (creep) => creep.ticksToLive <= 200).length;
     },
-}
+};
 
 module.exports = roomManager;

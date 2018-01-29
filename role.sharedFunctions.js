@@ -8,7 +8,10 @@ var roleSharedFunctions = {
             if(targets != ""){
                 return targets;
             } else {
-                return this.getFullSpawns(creep);
+                let screeps = creep.room.memory.screeps;
+                if (!screeps.shouldSpawn){
+                    return this.getRoomSpawns(creep);
+                }
             }
         }
     },
@@ -24,12 +27,12 @@ var roleSharedFunctions = {
     },
     
     getRoomExtensions: function(creep) {
-        let extensions = _.filter(creep.room.find(FIND_STRUCTURES), (structure) => structure.structureType == STRUCTURE_EXTENSION);
+        let extensions = _.filter(creep.room.find(FIND_STRUCTURES), (structure) => structure.structureType == STRUCTURE_EXTENSION && structure.energy > 0);
         return extensions;
     },
     
     getRoomContainers: function(creep) {
-        let containers = _.filter(creep.room.find(FIND_STRUCTURES), (structure) => structure.structureType == STRUCTURE_CONTAINER);
+        let containers = _.filter(creep.room.find(FIND_STRUCTURES), (structure) => structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 0);
         return containers;
     },
     
